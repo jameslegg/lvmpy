@@ -29,9 +29,9 @@ lv.create(lv_name,vg,size)
 
 LV Object Operations
 
-lv.attr(lv_attr, refresh=False)
-  A dictionery object of all the LV fields as documented in LVS(8). For Example lv_attr['LVMW_LV_NAME'] is the name of the LV.
-  If the optional aurgument refresh=True the dictonery containing the attributes will be updated by accessing running the lvs
+lv.field(lv_field, refresh=False)
+  A dictionery object of all the LV fields as documented in LVS(8). For Example lv_field['LVM2_LV_NAME'] is the name of the LV.
+  If the optional aurgument refresh=True the dictonery containing the fields will be updated by accessing running the lvs
   command before returning the attribute specified. 
   At all other times the value returned is captured the first time the lv object is instance is created.
 
