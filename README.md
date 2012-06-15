@@ -15,21 +15,25 @@ exception lv.OpFailError
 exception lv.NotSnapError
   Raise when when an operation specific to a snapshot is attempted on a normal LV.
 
+exception lv.NoLvAttrError
+  Raise when no Attribute of this type exists for the LV.
+
 LV Object Creation and Instantination
 
 lv(lv_name, vg_name)
   Returns an LV Object if exists, may be used as lv() on it's own if you want to use lv.create(lv_name,vg,size) later.
 
 lv.create(lv_name,vg,size)
-  Creates an LV and returns an LV Object connected to the new device.
+  Creates an LV and returns an LV Object connected to the new device. size is specified in Gigabytes.
   Raises OpFailError if unable to create and NoVgSpaceError if our off VG Space.
 
 LV Object Operations
 
 lv.attr(lv_attr, refresh=False)
   A dictionery object of all the LV fields as documented in LVS(8). For Example lv_attr['LVMW_LV_NAME'] is the name of the LV.
-  if optional aurgument refresh is True the dictonery returned will be updated before returning the attribute specified at all 
-  other times the dictionery returned is caputered the first time the lv object is imported.
+  If the optional aurgument refresh=True the dictonery containing the attributes will be updated by accessing running the lvs
+  command before returning the attribute specified. 
+  At all other times the value returned is captured the first time the lv object is instance is created.
 
 lv.reload()
   Reload the attributes stored by underlying LV, done automatically after a snapshot is taken. 

@@ -2,29 +2,40 @@
 
 import os
 import lvm
+import unittest
 
-def main():
+class TestSequenceFunctions(unittest.TestCase):
 
-  lv_name = "testlv"
-  vg_name = "VGi0"
-  lv_size = "5G"
+  def setUp(self):
+    self.testlv = lvm.lv()
 
-  
-  testlv = lvm.lv()
-  testlv.create(lv_name, vg_name, lv_size)
- 
-  print  testlv.attr['LVM2_LV_SIZE']
+  def tearDown(self):
+    self.testlv.remove()
 
-  if [ testlv.attr['LVM2_LV_SIZE'] == lv_size ]:
-    print "PASS"
-  else:
-    print "FAIL"
+  def test_create(self):
+    lv_name = "testlv"
+    vg_name = "VGi0"
+    lv_size = "5G"
+    self.testlv.create(lv_name, vg_name, lv_size)
+    self.assertTrue(self.testlv)
 
-  try:
-    test.remove()
-  except OpFailError, (e):
-    print "FAIL: Unable to remove" + e.parameter
+  def test_size(self):
+    lv_name = "testlv"
+    vg_name = "VGi0"
+    lv_size = "5"
+    self.testlv.create(lv_name, vg_name, lv_size)
+    attr = "LVM2_LV_SIZE"
+    size = self.testlv.attr(attr)
+    self.assertTrue( size == lv_size + ".00g")
+
+  def test_attr_except(self):
+    lv_name = "testlv"
+    vg_name = "VGi0"
+    lv_size = "5G"
+    self.testlv.create(lv_name, vg_name, lv_size)
+    attr = "NON_EXISTANT_ATTR"
+    self.assertRaises(lvm.NoLvAttrError, self.testlv.attr, attr)
 
 if __name__ == '__main__':
-    main()
+    unittest.main()
 
