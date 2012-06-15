@@ -79,17 +79,15 @@ class lv(object):
         name = lv_field[0]
         self.all_lv_fields[name] = val.replace("'","")
 
+    #refresh the lv attr bits as well
+    field = "LVM2_LV_ATTR"
+    attrs = list(self.field(field))
+    self.vol_type = attrs[0]
+    self.perm = attrs[1]
+    self.alloc_policy = attrs[2]
+    self.fixed = attrs[3]
+    self.state = attrs[4]
+    self.device = attrs[5]
 
-  #figure out the attributes of an LV
-  def __get_lv_attr(self, attr):
-     "Get out the lv_attr bits"
-     lvf = __get_lv_fields(self) 
-     lv_attr = lvf['LVM2_LV_ATTR'].split("")
-     print lv_attr
-     #volume type
-     lv = {}
-     if lv_attr[0] == 'S':
-       #lv['Snapshot']
-       return self.lv
-
-  
+  def voltype(self):
+    return self.vol_type
