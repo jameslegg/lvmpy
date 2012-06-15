@@ -47,15 +47,26 @@ class lv(object):
       raise OpFailError, lvrmcmd + lv_output[1]
     self.__del__()
 
+<<<<<<< HEAD
   def field(self, field, refresh=False):
+=======
+  def attr(self, attr, refresh=False):
+>>>>>>> aecaad76eb0c9096826e4b1385709005bace5ed2
     """Return an lv attribute specifed"""
     if refresh:
       self.__get_lv_fields()
     try:
+<<<<<<< HEAD
       myfield = self.all_lv_fields[field]
     except KeyError, e:
       raise NoLvAttrError, field + " not availble"
     return myfield
+=======
+      myattr = self.all_lv_fields[attr]
+    except KeyError, e:
+      raise NoLvAttrError, attr + " not availble"
+    return myattr
+>>>>>>> aecaad76eb0c9096826e4b1385709005bace5ed2
 
   #update Dictioneries with LV fields
   def __get_lv_fields(self):
@@ -81,7 +92,11 @@ class lv(object):
 
 
   #figure out the attributes of an LV
+<<<<<<< HEAD
   def __get_lv_attr(self, attr):
+=======
+  def __get_lv_attr2(self, attr):
+>>>>>>> aecaad76eb0c9096826e4b1385709005bace5ed2
      "Get out the lv_attr bits"
      lvf = __get_lv_fields(self) 
      lv_attr = lvf['LVM2_LV_ATTR'].split("")
