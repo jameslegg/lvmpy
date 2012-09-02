@@ -41,9 +41,7 @@ class lv:
     #blocks at this point if the command hangs for any reason
     lv_ret_code = lv.wait()
     if not ( lv_ret_code == 0 ):
-      cmd_run = lvrmcmd + ' -f ' + lv_path
-      print cmd_run
-      raise OpFailError, cmd_run + lv_output[1]
+      raise OpFailError, lvmrmcmd + lv_output[1]
 
   def get_attr(self, attr):
     '''Return LV attributes on request'''
