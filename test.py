@@ -2,29 +2,31 @@
 
 import os
 import lvm
+import unittest
+import time
 
-def main():
-
+class TestLvFunctions(unittest.TestCase):
   lv_name = "testlv"
-  vg_name = "VGi0"
-  lv_size = "5G"
+  vg_name = "testvg"
+  #supplied in the format LVM2 stores sizes to make validation easier
+  lv_size = "4.00g"
+  def setUp(self):
+    self.testlv = lvm.lv()
+    self.testlv.create(self.lv_name, self.vg_name, self.lv_size)
 
-  
-  testlv = lvm.lv()
-  testlv.create(lv_name, vg_name, lv_size)
- 
-  print  testlv.attr['LVM2_LV_SIZE']
+  def test_size(self):
+    self.assertEqual(self.lv_size, self.testlv.get_attr('LVM2_LV_SIZE'))
 
-  if [ testlv.attr['LVM2_LV_SIZE'] == lv_size ]:
-    print "PASS"
-  else:
-    print "FAIL"
+  def test_lvname(self):
+    self.assertEqual(self.lv_name, self.testlv.get_attr('LVM2_LV_NAME'))
 
-  try:
-    test.remove()
-  except OpFailError, (e):
-    print "FAIL: Unable to remove" + e.parameter
+  def test_vgname(self):
+    self.assertEqual(self.vg_name, self.testlv.get_attr('LVM2_VG_NAME'))
+
+  def tearDown(self):
+    #can't delete an LV immediatly after creation
+    time.sleep(0.5)
+    self.testlv.remove()
 
 if __name__ == '__main__':
-    main()
-
+  unittest.main()

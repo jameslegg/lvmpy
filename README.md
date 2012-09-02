@@ -18,7 +18,7 @@ exception lv.NotSnapError
 LV Object Creation and Instantination
 
 lv(lv_name, vg_name)
-  Returns an LV Object if exists, may be used as lv() on it's own if you want to use lv.create(lv_name,vg,size) later.
+  Returns an LV Object if exists, may be used as lv() on its own if you want to use lv.create(lv_name,vg,size) later.
 
 lv.create(lv_name,vg,size)
   Creates an LV and returns an LV Object connected to the new device.
