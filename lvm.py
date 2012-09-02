@@ -31,15 +31,15 @@ class lv:
     return self
 
   def remove(self):
-    '''Create an LV and return and lv object that reffers to it'''
+    '''Remove an LV'''
     lvrmcmd = '/sbin/lvremove'
-    lv_path = self.lv_fields['LVM2_VG_NAME'] + "/" + self.lv_fields['LVM2_LV_NAME']
-    lv = Popen([lvrmcmd, '-f', lv_path], stdout=PIPE, stderr=PIPE) 
+    lv = Popen([lvrmcmd, '-f', self.fq_lvn], stdout=PIPE, stderr=PIPE) 
     lv_output = lv.communicate()
     #blocks at this point if the command hangs for any reason
     lv_ret_code = lv.wait()
     if not ( lv_ret_code == 0 ):
-      raise OpFailError, lvmrmcmd + lv_output[1]
+      raise OpFailError, lvrmcmd + lv_output[1]
+    self.__del__()
 
   def attr(self, attr, refresh=False):
     '''Return LV attributes on request'''
@@ -50,8 +50,7 @@ class lv:
   def snapshot(self, snapshot, snapsize):
     '''Create a Snapshot of an LV and return an lv object of that snapshot'''
     lvcreatecmd = '/sbin/lvcreate'
-    lv_path = self.lv_fields['LVM2_VG_NAME'] + "/" + self.lv_fields['LVM2_LV_NAME']
-    lvsnap = Popen([lvcreatecmd, '--size', snapsize, '--name', snapshot, '--snapshot', lv_path], stdout=PIPE, stderr=PIPE)
+    lvsnap = Popen([lvcreatecmd, '--size', snapsize, '--name', snapshot, '--snapshot', self.fq_lvn], stdout=PIPE, stderr=PIPE)
     lvsnap_output = lvsnap.communicate()
     lvsnap_ret_code = lvsnap.wait()
     if not ( lvsnap_ret_code == 0):
@@ -60,17 +59,35 @@ class lv:
     new_snap.__get_lv_fields()
     return new_snap
 
-   
+  def merge(self):
+    '''Merge a snapshot back into LV'''
+    lvmergecmd = '/sbin/lvconvert'
+    lvmerge = Popen([lvmergecmd, '--merge', self.fq_lvn], stdout=PIPE, stderr=PIPE)
+    lvmerge_output = lvmerge.communicate()
+    lvmerge_ret_code = lvmerge.wait()
+    if not ( lvmerge_ret_code == 0):
+      raise OpFailError, lvmergecmd + lvmerge_output[1]
 
-  #return Dictioneries with LV fields
+  def exists(self):
+    '''Check if the underyling lv or snapshot exists'''
+    lvscmd = '/sbin/lvs'
+    nohead = '--noheadings'
+    lvs = Popen([lvscmd, nohead, self.fq_lvn], stdout=PIPE, stderr=PIPE) 
+    lvs_output = lvs.communicate()[0]
+    lvs_ret_code = lvs.wait()
+    if lvs_ret_code == 0:
+      return True
+    else:
+      return False
+
   def __get_lv_fields(self):
-    "Get the LV and VG fields"
+    '''Return all the LV and VG fields'''
     lvscmd = '/sbin/lvs'
     nmprfx = '--nameprefixes'
     nohead = '--noheadings'
     opt = '-o'
     get_fields = 'lv_all,vg_all'
-    lvs = Popen([lvscmd, nmprfx, nohead, opt, get_fields, self.fq_lvn], stdout=PIPE) 
+    lvs = Popen([lvscmd, nmprfx, nohead, opt, get_fields, self.fq_lvn], stdout=PIPE, stderr=PIPE) 
     lvs_output = lvs.communicate()[0]
     lvs_ret_code = lvs.wait()
     if not ( lvs_ret_code == 0 ):
@@ -83,16 +100,14 @@ class lv:
         continue
       self.lv_fields[lv_field[0]] = lv_field[1].strip().replace("'","")
 
-  #figure out the attributes of an LV
-  def __get_lv_attr(lv):
-     "Get out the lv_attr bits"
-     lvf = get_lv_fields(lv) 
-     lv_attr = lvf['LVM2_LV_ATTR'].split("")
-     #volume type
-     lv = {}
-     if lv_attr[0] == 'S':
-       lv['Snapshot']
-     return lv 
+  def issnap(self):
+     "Returns True if the lv is a snapshot"
+     lv_attr = list(self.lv_fields['LVM2_LV_ATTR'])
+     #First bit is S for Snapshot or s for merging snapshot
+     if lv_attr[0] == 'S' or lv_attr[0] == 's':
+       return True
+     else:
+      return False
 
   def __init__(self, vg_name=None, lv_name=None):
     self.lv = object 

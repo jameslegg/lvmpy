@@ -27,17 +27,14 @@ lv.create(lv_name,vg,size)
 LV Object Operations
 
 lv.attr(lv_attr, refresh=False)
-  A dictionery object of all the LV fields as documented in LVS(8). For Example lv_attr['LVMW_LV_NAME'] is the name of the LV.
+  A dictionery object of all the LV fields as documented in LVS(8). For Example lv_attr['LVM2_LV_NAME'] is the name of the LV.
   if optional aurgument refresh is True the dictonery returned will be updated before returning the attribute specified at all 
   other times the dictionery returned is caputered the first time the lv object is imported.
 
-lv.reload()
-  Reload the attributes stored by underlying LV, done automatically after a snapshot is taken. 
-  Intended to be used when waiting for a snapshot to merge or to refreshed other dynamic values.
-
 lv.snapshot(varname, int)
   Create a snapshot of the LV with a name varname and the %size int.
-  Raise an NoSpaceError or OpFailErrot if unable to complete.
+  Raise an NoSpaceError or OpFailError if unable to complete.
+  Returns an lv object (with attr fields pre-populated) of the newly created snapshot
 
 lv.merge()
   Merge an LV snapshot back into the origin.
@@ -47,3 +44,7 @@ lv.merge()
 lv.remove()
   Removes the LV 
   Raises OpFailError if unable to remove.
+
+lv.issnap()
+  Returns True if a snapshot (or is a merging snapshot)
+  Returns False if not a snapshot
