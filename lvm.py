@@ -43,8 +43,10 @@ class lv:
     if not ( lv_ret_code == 0 ):
       raise OpFailError, lvmrmcmd + lv_output[1]
 
-  def get_attr(self, attr):
+  def attr(self, attr, refresh=False):
     '''Return LV attributes on request'''
+    if refresh:
+      self.__get_lv_fields(self)
     return self.lv_fields[attr]
 
   #return Dictioneries with LV fields

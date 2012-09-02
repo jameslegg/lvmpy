@@ -15,13 +15,13 @@ class TestLvFunctions(unittest.TestCase):
     self.testlv.create(self.lv_name, self.vg_name, self.lv_size)
 
   def test_size(self):
-    self.assertEqual(self.lv_size, self.testlv.get_attr('LVM2_LV_SIZE'))
+    self.assertEqual(self.lv_size, self.testlv.attr('LVM2_LV_SIZE'))
 
   def test_lvname(self):
-    self.assertEqual(self.lv_name, self.testlv.get_attr('LVM2_LV_NAME'))
+    self.assertEqual(self.lv_name, self.testlv.attr('LVM2_LV_NAME'))
 
   def test_vgname(self):
-    self.assertEqual(self.vg_name, self.testlv.get_attr('LVM2_VG_NAME'))
+    self.assertEqual(self.vg_name, self.testlv.attr('LVM2_VG_NAME'))
 
   def tearDown(self):
     #can't delete an LV immediatly after creation
