@@ -16,7 +16,7 @@ class lv:
 
   def create(self, lv_name, vg_name, lv_size):
     '''Create an LV and return an lv object that refers to it'''
-    fq_lvn = vg_name + "/" + lv_name
+    self.fq_lvn = vg_name + "/" + lv_name
     lvcreatecmd = '/sbin/lvcreate'
     lv = Popen([lvcreatecmd, '-L', lv_size, '-n', lv_name, vg_name], stdout=PIPE, stderr=PIPE) 
     lv_output = lv.communicate()
@@ -30,12 +30,10 @@ class lv:
     self.__get_lv_fields()
     return self
 
-
   def remove(self):
     '''Create an LV and return and lv object that reffers to it'''
     lvrmcmd = '/sbin/lvremove'
     lv_path = self.lv_fields['LVM2_VG_NAME'] + "/" + self.lv_fields['LVM2_LV_NAME']
-    
     lv = Popen([lvrmcmd, '-f', lv_path], stdout=PIPE, stderr=PIPE) 
     lv_output = lv.communicate()
     #blocks at this point if the command hangs for any reason
@@ -49,6 +47,21 @@ class lv:
       self.__get_lv_fields(self)
     return self.lv_fields[attr]
 
+  def snapshot(self, snapshot, snapsize):
+    '''Create a Snapshot of an LV and return an lv object of that snapshot'''
+    lvcreatecmd = '/sbin/lvcreate'
+    lv_path = self.lv_fields['LVM2_VG_NAME'] + "/" + self.lv_fields['LVM2_LV_NAME']
+    lvsnap = Popen([lvcreatecmd, '--size', snapsize, '--name', snapshot, '--snapshot', lv_path], stdout=PIPE, stderr=PIPE)
+    lvsnap_output = lvsnap.communicate()
+    lvsnap_ret_code = lvsnap.wait()
+    if not ( lvsnap_ret_code == 0):
+      raise OpFailError, lvcreatecmd + lvsnap_output[1]
+    new_snap = self.__class__(self.lv_fields['LVM2_VG_NAME'], snapshot)
+    new_snap.__get_lv_fields()
+    return new_snap
+
+   
+
   #return Dictioneries with LV fields
   def __get_lv_fields(self):
     "Get the LV and VG fields"
@@ -57,7 +70,7 @@ class lv:
     nohead = '--noheadings'
     opt = '-o'
     get_fields = 'lv_all,vg_all'
-    lvs = Popen([lvscmd, nmprfx, nohead, opt, get_fields, ], stdout=PIPE) 
+    lvs = Popen([lvscmd, nmprfx, nohead, opt, get_fields, self.fq_lvn], stdout=PIPE) 
     lvs_output = lvs.communicate()[0]
     lvs_ret_code = lvs.wait()
     if not ( lvs_ret_code == 0 ):
@@ -70,7 +83,6 @@ class lv:
         continue
       self.lv_fields[lv_field[0]] = lv_field[1].strip().replace("'","")
 
-
   #figure out the attributes of an LV
   def __get_lv_attr(lv):
      "Get out the lv_attr bits"
@@ -82,12 +94,13 @@ class lv:
        lv['Snapshot']
      return lv 
 
-  def __init___(self, vg_name=None, lv_name=None):
+  def __init__(self, vg_name=None, lv_name=None):
     self.lv = object 
-    lv_fields = dict()
+    self.lv_fields = dict()
     #minimum required to refer to an LV
-    fq_lvn = vg_name + "/" + lv_name
-    return self
+    #These don't have to be supplier here if calling create() later
+    if vg_name is not None and lv_name is not None:
+      self.fq_lvn = vg_name + "/" + lv_name
 
   def __del__(self):
     del self
